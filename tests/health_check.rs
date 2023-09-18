@@ -32,7 +32,7 @@ async fn subscribe_returns_a_200_for_valid_form_data() {
     let body = "name=le%20guin&email=ursula_le_guin%40gmail.com";
     let response = client
         .post(&format!("{}/subscriptions", address))
-        .header("content-type", "application/x-www-urlencoded")
+        .header("content-type", "application/x-www-form-urlencoded")
         .body(body)
         .send()
         .await
@@ -55,12 +55,17 @@ async fn subscribe_returns_a_400_when_data_is_missing() {
     for (invalid_body, error_message) in test_cases {
         let response = client
             .post(&format!("{}/subscriptions", address))
-            .header("content-type", "application/x-www-urlencoded")
+            .header("content-type", "application/x-www-form-urlencoded")
             .body(invalid_body)
             .send()
             .await
-            .expect(error_message);
+            .expect("Failed to execute request");
 
-        assert_eq!(400, response.status().as_u16());
+        assert_eq!(
+            400,
+            response.status().as_u16(),
+            "The API did not fail with 400 Bad Request when the payload was {}",
+            error_message
+        );
     }
 }
